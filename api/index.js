@@ -1,14 +1,14 @@
 import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server';
+import { expressMiddleware } from '@as-integrations/express5';
 import express from 'express';
-import cors from 'cors'; // Import cors
+import cors from 'cors';
 
+// --- Your Schema, Data, and Resolvers ---
 const getStatus = (stock, demand) => {
   if (stock > demand) return 'Healthy';
   if (stock === demand) return 'Low';
   return 'Critical';
 };
-
 const typeDefs = `#graphql
   type Warehouse { code: ID! name: String! city: String! country: String! }
   type Product { id: ID! name: String! sku: String! warehouse: String! stock: Int! demand: Int! }
@@ -23,7 +23,6 @@ const typeDefs = `#graphql
     transferStock(id: ID!, from: String!, to: String!, qty: Int!): Product!
   }
 `;
-
 const productsData = [
   { "id": "P-1001", "name": "12mm Hex Bolt", "sku": "HEX-12-100", "warehouse": "BLR-A", "stock": 180, "demand": 120 },
   { "id": "P-1002", "name": "Steel Washer", "sku": "WSR-08-500", "warehouse": "BLR-A", "stock": 50, "demand": 80 },
@@ -43,7 +42,6 @@ const kpisData = {
     '14d': [ { date: 'Day 1', stock: 500, demand: 400 }, { date: 'Day 14', stock: 650, demand: 550 } ],
     '30d': [ { date: 'Day 1', stock: 600, demand: 500 }, { date: 'Day 30', stock: 750, demand: 650 } ],
 };
-
 const resolvers = {
   Query: {
     products: (_, { search, status, warehouse }) => {
@@ -83,10 +81,9 @@ const server = new ApolloServer({
   resolvers,
 });
 
-// We must await server.start() before calling expressMiddleware
 await server.start();
 
+// Vercel routes requests to this function. The middleware should handle all paths.
 app.use(cors(), express.json(), expressMiddleware(server));
 
-// This is the Vercel-compatible serverless function handler
 export default app;
