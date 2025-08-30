@@ -23,7 +23,7 @@ const typeDefs = `#graphql
     stock: Int!
     demand: Int!
   }
-
+  
   type KPI {
     date: String!
     stock: Int!
@@ -42,7 +42,8 @@ const typeDefs = `#graphql
   }
 `;
 
-let productsData = [
+// Sample data from the assignment
+const productsData = [
   { "id": "P-1001", "name": "12mm Hex Bolt", "sku": "HEX-12-100", "warehouse": "BLR-A", "stock": 180, "demand": 120 },
   { "id": "P-1002", "name": "Steel Washer", "sku": "WSR-08-500", "warehouse": "BLR-A", "stock": 50, "demand": 80 },
   { "id": "P-1003", "name": "M8 Nut", "sku": "NUT-08-200", "warehouse": "PNQ-C", "stock": 80, "demand": 80 },
@@ -64,19 +65,23 @@ const kpisData = {
     '30d': [ { date: 'Day 1', stock: 600, demand: 500 }, { date: 'Day 30', stock: 750, demand: 650 } ],
 };
 
+
 const resolvers = {
   Query: {
     products: (_, { search, status, warehouse }) => {
       let filteredProducts = productsData;
 
+      // Filter by warehouse
       if (warehouse) {
         filteredProducts = filteredProducts.filter(p => p.warehouse === warehouse);
       }
 
+      // Filter by status
       if (status) {
         filteredProducts = filteredProducts.filter(p => getStatus(p.stock, p.demand) === status);
       }
 
+      // Filter by search term
       if (search) {
         const term = search.toLowerCase();
         filteredProducts = filteredProducts.filter(p => 
@@ -96,6 +101,7 @@ const resolvers = {
       const product = productsData.find(p => p.id === id);
       if (!product) throw new Error('Product not found');
       product.demand = demand;
+      
       return product;
     },
     transferStock: (_, { id, from, to, qty }) => {
@@ -104,6 +110,7 @@ const resolvers = {
         if (product.stock < qty) throw new Error('Insufficient stock for transfer');
 
         product.stock -= qty;
+        
         console.log(`Transferred ${qty} of ${product.name} from ${from} to ${to}`);
         return product;
     },
@@ -119,4 +126,4 @@ const { url } = await startStandaloneServer(server, {
   listen: { port: 4000 },
 });
 
-console.log(`🚀  Mock Server ready at: ${url}`);
+console.log(`🚀 Mock Server ready at: ${url}`);
