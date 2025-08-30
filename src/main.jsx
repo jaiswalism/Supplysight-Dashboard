@@ -5,13 +5,13 @@ import './index.css';
 import { createClient, Provider, cacheExchange, fetchExchange } from 'urql';
 
 const client = createClient({
-  url: 'http://localhost:4000/',
+  url: '/api/',
   exchanges: [cacheExchange, fetchExchange],
   fetchOptions: () => {
     return {
-      method: 'POST', 
+      method: 'POST',
       headers: {
-        'Content-Type': 'application/json', 
+        'Content-Type': 'application/json',
       },
     };
   },
