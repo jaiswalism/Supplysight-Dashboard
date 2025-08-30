@@ -1,8 +1,7 @@
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import express from 'express';
-import cors from 'cors';
-import http from 'http';
+import cors from 'cors'; // Import cors
 
 const getStatus = (stock, demand) => {
   if (stock > demand) return 'Healthy';
@@ -78,29 +77,16 @@ const resolvers = {
   },
 };
 
-async function startServer() {
-  const app = express();
-  const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-  });
+const app = express();
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+});
 
-  await server.start();
+// We must await server.start() before calling expressMiddleware
+await server.start();
 
-  app.use(
-    '/', 
-    cors(),
-    express.json(),
-    expressMiddleware(server)
-  );
-  
-  if (process.env.NODE_ENV !== 'production') {
-    http.createServer(app).listen(4000, () => {
-      console.log(`🚀 Server ready at http://localhost:4000/`);
-    });
-  }
+app.use(cors(), express.json(), expressMiddleware(server));
 
-  return app;
-}
-
-export default startServer();
+// This is the Vercel-compatible serverless function handler
+export default app;
